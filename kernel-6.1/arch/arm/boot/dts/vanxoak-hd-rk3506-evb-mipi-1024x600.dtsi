@@ -1,0 +1,214 @@
+#include <dt-bindings/display/drm_mipi_dsi.h>
+#include <dt-bindings/input/rk-input.h>
+#include <dt-bindings/suspend/rockchip-rk3506.h>
+
+/ {
+	vcc_mipi_pwren: vcc-mipi_pwren-regulator {
+		compatible = "regulator-fixed";
+		regulator-boot-on;
+		regulator-always-on;
+		regulator-name = "vcc_mipi_pwren";
+		enable-active-high;
+		gpio = <&gpio1 RK_PB0 GPIO_ACTIVE_HIGH>;
+		pinctrl-name = "default";
+		pinctrl-0 = <&mipi_pwren_gpio>;
+	};
+};
+
+&dsi {
+	status = "okay";
+	//rockchip,lane-rate = <1000>;
+	dsi_panel: panel@0 {
+		status = "okay";
+		compatible = "simple-panel-dsi";
+		reg = <0>;
+		backlight = <&backlight>;
+		// power-supply = <&vcc3v3_lcd_n>;
+		// reset-gpio = <&gpio1 RK_PB0 GPIO_ACTIVE_LOW>;
+		reset-delay-ms = <10>;
+		enable-delay-ms = <10>;
+		prepare-delay-ms = <10>;
+		unprepare-delay-ms = <10>;
+		disable-delay-ms = <60>;
+		//width-mm = <68>;
+		//height-mm = <121>;
+		dsi,flags = <(MIPI_DSI_MODE_VIDEO | MIPI_DSI_MODE_VIDEO_BURST |
+				  MIPI_DSI_MODE_LPM | MIPI_DSI_MODE_NO_EOT_PACKET)>;
+		dsi,format = <MIPI_DSI_FMT_RGB888>;
+		dsi,lanes  = <2>;
+
+		panel-init-sequence = [
+			// init code
+			15 00 02 30 00
+			39 00 05 f7 49 61 02 00
+			15 00 02 30 01
+			15 00 02 04 0C
+			15 00 02 05 00 
+			15 00 02 06 00 
+			15 00 02 0B 11	// 0x13 4lanes 0x11 2lanes
+			15 00 02 17 00
+			15 00 02 20 04
+			15 00 02 1F 05 
+			15 00 02 23 00
+			15 00 02 25 19
+			15 00 02 28 18
+			15 00 02 29 FC
+			15 00 02 2A 00
+			15 00 02 2B FC
+			15 00 02 2C 00
+			15 00 02 30 02
+			15 00 02 01 22
+			15 00 02 03 12
+			15 00 02 04 00
+			15 00 02 05 64
+			15 00 02 0A 08
+			39 00 0C 0B 0A 1A 0B 0D 0D 11 10 06 08 1F 1D 
+			39 00 0C 0C 0D 0D 0D 0D 0D 0D 0D 0D 0D 0D 0D 
+			39 00 0C 0D 16 1B 0B 0D 0D 11 10 07 09 1E 1C 
+			39 00 0C 0E 0D 0D 0D 0D 0D 0D 0D 0D 0D 0D 0D 
+			39 00 0C 0F 16 1B 0D 0B 0D 11 10 1D 1F 08 06 
+			39 00 0C 10 0D 0D 0D 0D 0D 0D 0D 0D 0D 0D 0D 
+			39 00 0C 11 0A 1A 0D 0B 0D 11 10 1D 1F 08 06 
+			39 00 0C 12 0D 0D 0D 0D 0D 0D 0D 0D 0D 0D 0D
+			39 00 05 14 00 00 00 00 
+			15 00 02 18 99
+			15 00 02 30 06
+			39 00 0F 12 36 2B 2C 3A 33 30 30 2E 2B 1B 2A 20 16 29
+			39 00 0F 13 36 2B 2C 3A 33 30 30 2E 2B 1B 2A 20 16 29
+			15 00 02 30 0A
+			15 00 02 02 4F
+			15 00 02 0B 40
+			15 00 02 12 3E
+			15 00 02 13 78
+			15 00 02 30 0D
+			15 00 02 0D 04
+			15 00 02 10 0C
+			15 00 02 11 0C
+			15 00 02 12 0C
+			15 00 02 13 0C
+			15 00 02 30 00
+			05 78 01 11
+			05 14 01 29
+		];
+
+		disp_timings0: display-timings {
+			native-mode = <&dsi_timing0>;
+			dsi_timing0: timing0 {
+				  clock-frequency = <42000000>;
+				  hactive = <1024>;
+				  vactive = <600>;
+				  hback-porch = <136>;
+				  hfront-porch = <160>;
+				  vback-porch = <21>;
+				  vfront-porch = <18>;
+				  hsync-len = <24>;
+				  vsync-len = <5>;
+				  hsync-active = <0>;
+				  vsync-active = <0>;
+				  de-active = <0>;
+				  pixelclk-active = <0>;
+			};
+		};
+
+		ports {
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			port@0 {
+				reg = <0>;
+				panel_in_dsi: endpoint {
+					remote-endpoint = <&dsi_out_panel>;
+					status = "okay";
+				};
+			};
+		};
+	};
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@1 {
+			reg = <1>;
+			dsi_out_panel: endpoint {
+				remote-endpoint = <&panel_in_dsi>;
+			};
+		};
+	};
+};
+
+&display_subsystem {
+	status = "okay";
+	logo-memory-region = <&drm_logo>;
+};
+
+&vop {
+	status = "okay";
+};
+
+&dsi_in_vop {
+	status = "okay";
+};
+
+&rgb_in_vop {
+	status = "disabled";
+};
+
+&route_dsi {
+	status = "okay";
+	//logo,rotate = <3>;
+};
+
+&route_rgb {
+	status = "disabled";
+};
+
+&dsi_dphy {
+	status = "okay";
+};
+
+&backlight {
+	compatible = "pwm-backlight";
+	pwms = <&pwm0_4ch_2 0 10000 0>;
+	status = "okay";
+};
+
+// TOUCH
+&i2c2 {
+	status = "okay";
+	 pinctrl-0 = <&rm_io4_i2c2_scl &rm_io5_i2c2_sda>;
+
+	gt9xx: gt9xx@5d {
+		compatible = "goodix,gt9xx";
+		reg = <0x5d>;
+
+		pinctrl-names = "default";
+		pinctrl-0 = <&gt911_int_pin &gt911_rst_pin>;
+
+		touch-gpio = <&gpio1 RK_PC2 IRQ_TYPE_LEVEL_LOW>;
+		reset-gpio = <&gpio1 RK_PC3 GPIO_ACTIVE_HIGH>;
+		max-x = <1024>;
+		max-y = <600>;
+		tp-size = <911>;
+		gtp-y-reverse;					// y轴翻转
+		//not-send-cfg;					// 默认不发送屏幕配置，注释表示发送屏幕配置
+		status = "okay";
+      	//power-supply = <&vcc18_lcd_n>;
+	};
+};
+
+&pinctrl {
+	gt911{
+		gt911_int_pin: gt911_int_pin {
+			rockchip,pins = <1 RK_PC2 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+		gt911_rst_pin: gt911_rst_pin {
+			rockchip,pins = <1 RK_PC3 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+	mipi_lcd{
+		mipi_pwren_gpio: mipi_pwren_gpio {
+			rockchip,pins = <1 RK_PB0 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+};

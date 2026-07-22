@@ -1,0 +1,6 @@
+config RJGT102
+	bool "(SDR) RJGT102 Secure Authentication and Validation Device support"
+	default y
+	help
+	    Say Y here if you want to support the /dev/SDR-secure device. The
+		/dev/SDR-secure device is a Secure Authentication and Validation Device.

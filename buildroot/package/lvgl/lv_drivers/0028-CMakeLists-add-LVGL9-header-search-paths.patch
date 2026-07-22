@@ -1,0 +1,30 @@
+From 7b0d4f8f6a4d9bc4e4e9f1c9d7f5c6c0f0f0a001 Mon Sep 17 00:00:00 2001
+From: Codex <codex@openai.com>
+Date: Fri, 14 Mar 2026 14:20:00 +0800
+Subject: [PATCH] CMakeLists: add LVGL9 header search paths
+
+LVGL9 installs headers below usr/include/lvgl, while some lv_drivers
+sources and LVGL9 driver headers still include <lvgl.h>. Add both the
+sysroot root include directory and the LVGL include directory so
+lv_drivers-reconfigure works with either include style.
+
+Signed-off-by: Codex <codex@openai.com>
+---
+ CMakeLists.txt | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 6b42c0c..4828df0 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -40,6 +40,8 @@ if (LV_DRV_USE_RKADK)
+ endif()
+ 
+ add_definitions(-g -DLV_CONF_INCLUDE_SIMPLE)
++include_directories(${CMAKE_SYSROOT}/usr/include/)
++include_directories(${CMAKE_SYSROOT}/usr/include/lvgl/)
+ include_directories(${CMAKE_SYSROOT}/usr/include/libdrm/)
+ 
+ target_include_directories(lv_drivers SYSTEM PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+-- 
+2.25.1

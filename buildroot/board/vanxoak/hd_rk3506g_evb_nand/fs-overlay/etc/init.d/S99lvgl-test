@@ -1,0 +1,48 @@
+#!/bin/bash
+
+case "$1" in
+    start)
+        echo "[INFO] Start lvgl test..."
+        cal_time 192.168.1.11 12345 &
+        # 检查目录是否存在
+        if [ -d "/mnt/udisk/hd-rk3506-evb-test" ]; then
+            echo "[OK] detect /mnt/udisk/hd-rk3506-evb-test"
+
+            echo "[INFO] kill old lvgl display"
+            killall -9 lv_demo rk_demo lv_rk3506_evb_test 2>/dev/null
+
+            echo "[INFO] mount /dev/sda1 -> /mnt"
+            mount /dev/sda1 /mnt/udisk/
+
+            if [ $? -ne 0 ]; then
+                echo "[ERROR] mount /dev/sda1 error ,exit...."
+                exit 1
+            fi
+
+            echo "[OK] mount success"
+
+            echo "[INFO] run  lv_rk3506_evb_test ..."
+            /mnt/udisk/hd-rk3506-evb-test/lv_rk3506_evb_test &
+
+            echo "[OK] run success"
+        else
+            echo "[WARN] not find /mnt/udisk/hd-rk3506-evb-test！"
+        fi
+        ;;
+
+    stop)
+        echo "[INFO] Stop lvgl test..."
+        killall -9 lv_demo rk_demo lv_rk3506_evb_test 2>/dev/null
+        ;;
+
+    restart|reload)
+        $0 stop
+        $0 start
+        ;;
+
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit 0
