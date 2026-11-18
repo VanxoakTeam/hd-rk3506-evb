@@ -197,6 +197,14 @@
 	cpu-supply = <&vdd_arm>;
 };
 
+&wdt0 {
+    status = "okay";
+};
+
+&wdt1 {
+    status = "okay";
+};
+
 &can0 {
 	rockchip,rx-max-data = <18>;
 	assigned-clocks = <&cru CLK_CAN0>;
